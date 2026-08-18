@@ -11,18 +11,19 @@ ext {
 	file_name_int = 'rainments-int-wss.war'
 }
 
+group = 'com.romanpulov'
+version = '0.4.15'
+
 bootWar {
 	archiveFileName = file_name_build
 }
 
 processResources {
+	def expandProperties = project.properties
 	filesMatching('gr.properties') {
-		expand(project.properties)
+		expand(expandProperties)
 	}
 }
-
-group = 'com.romanpulov'
-version = '0.4.14'
 
 repositories {
 	mavenCentral()
@@ -78,4 +79,8 @@ tasks.register('printProps') {
 	doLast {
 		println tomcat_webapps
 	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs += ['-Xlint:deprecation']
 }

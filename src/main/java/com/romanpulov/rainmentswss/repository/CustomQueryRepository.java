@@ -27,8 +27,8 @@ public class CustomQueryRepository {
     @Transactional
     public Object getScalarQueryResult(String queryString) {
         List<?> resultList = getSession().createQuery(queryString, Object.class).getResultList();
-        if (resultList.size() > 0) {
-            return resultList.get(0);
+        if (!resultList.isEmpty()) {
+            return resultList.getFirst();
         } else {
             return null;
         }
