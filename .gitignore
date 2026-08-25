@@ -13,8 +13,8 @@ out/
 memory
 
 ### Test DB files
-rainments-test.db
-rainments-int.db 
+piastria-test.db
+piastria-int.db 
 
 ### Initial data
 db/initial

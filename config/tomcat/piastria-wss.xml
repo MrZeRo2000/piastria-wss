@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+	<Parameter name="db-url" value="jdbc:sqlite:R:\OneDrive\Piastria\db\piastria.db"/>
+	<Parameter name="db-backup-path" value="R:\OneDrive\Piastria\db\backup"/>
+</Context>

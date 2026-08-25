@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+	<Parameter name="db-url" value="jdbc:sqlite:D:\prj\piastria-wss\db\database\piastria-int.db"/>
+	<Parameter name="db-backup-path" value="D:\prj\piastria-wss\db\database\backup"/>
+	<Parameter name="spring.profiles.active" value="int"/>
+</Context>

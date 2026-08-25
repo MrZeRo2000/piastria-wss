@@ -6,9 +6,9 @@ plugins {
 }
 
 ext {
-	file_name_build = 'rainments-wss-build.war'
-	file_name_prod = 'rainments-wss.war'
-	file_name_int = 'rainments-int-wss.war'
+	file_name_build = 'piastria-wss-build.war'
+	file_name_prod = 'piastria-wss.war'
+	file_name_int = 'piastria-int-wss.war'
 }
 
 group = 'com.romanpulov'

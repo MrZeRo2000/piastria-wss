@@ -1177,7 +1177,7 @@ PhysOpts=
 
 [ModelOptions\Default Opts\JIDX]
 PhysOpts=</a:ModelOptionsText>
-<a:RepositoryFilename>D:\prj\rainments-wss\db\model\PDM1.pdm</a:RepositoryFilename>
+<a:RepositoryFilename>D:\prj\piastria-wss\db\model\PDM1.pdm</a:RepositoryFilename>
 <c:DBMS>
 <o:Shortcut Id="o3">
 <a:ObjectID>13E64325-9CC2-4DB4-81DD-AE85B03C7AE6</a:ObjectID>

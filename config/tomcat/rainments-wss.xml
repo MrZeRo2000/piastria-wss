@@ -1,5 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<Context>
-	<Parameter name="db-url" value="jdbc:sqlite:R:\OneDrive\Rainments\db\rainments.db"/>
-	<Parameter name="db-backup-path" value="R:\OneDrive\Rainments\db\backup"/>
-</Context>

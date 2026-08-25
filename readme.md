@@ -10,10 +10,10 @@
 
 # Configure debug execution:
 -  Run Tomcat Server
--  Artifact: Gradle : com.romanpulov : rainments-wss.bootWar, output directory: D:\prj\rainments-wss\build\libs
+-  Artifact: Gradle : com.romanpulov : piastria-wss.bootWar, output directory: D:\prj\piastria-wss\build\libs
 -  HTTP Port: 3000
--  Deployment -> Application context: `/ide_rainments_wss_war`
--  Open browser after launch: `http://localhost:3000/ide_rainments_wss_war/payment-objects`
+-  Deployment -> Application context: `/ide_piastria_wss_war`
+-  Open browser after launch: `http://localhost:3000/ide_piastria_wss_war/payment-objects`
 -  CORS setup for TomCat: 
    - web.xml.cors
 
@@ -26,12 +26,12 @@
 # Build and deploy Int version:
 - `./gradlew.ps1 build`
 - `./gradlew.ps1 deployInt`
-- copy rainments-int-wss.xml
+- copy piastria-int-wss.xml
 
 # Build and deploy Prod version:
 * `./gradlew.ps1 build`
 * `./gradlew.ps1 deployProd`
-*  copy rainments-wss.xml
+*  copy piastria-wss.xml
 
 # Build with specified tomcat home directory:
 `./gradlew.ps1 clean build deployInt -Ptomcat_home=D:/prj/apache-tomcat-9.0.24`

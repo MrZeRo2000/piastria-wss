@@ -10,6 +10,6 @@
         a context-scoped property here keeps each app reporting its own name. base.xml is
         included unchanged, so the console/file appenders and pattern stay version-proof.
     -->
-    <springProperty scope="context" name="APPLICATION_NAME" source="spring.application.name" defaultValue="rainments-wss"/>
+    <springProperty scope="context" name="APPLICATION_NAME" source="spring.application.name" defaultValue="piastria-wss"/>
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
 </configuration>
