@@ -1,10 +1,16 @@
 package com.romanpulov.piastriawss;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 
 public class DBHelper {
@@ -14,13 +20,12 @@ public class DBHelper {
     static void prepareTestDB() {
         log.info("Before all tests");
 
-        String templateDBFileName = System.getProperty("user.dir") + File.separator + "db" + File.separator + "database" + File.separator + "piastria.db";
+        String schemaFileName = System.getProperty("user.dir") + File.separator + "src" + File.separator + "test" + File.separator + "resources" + File.separator + "db" + File.separator + "schema.sql";
         String testDBFileName = System.getProperty("user.dir") + File.separator + "db" + File.separator + "database" + File.separator + "piastria-test.db";
 
-        log.info("templateDBFileName:" + templateDBFileName);
+        log.info("schemaFileName:" + schemaFileName);
         log.info("testDBPath:" + testDBFileName);
 
-        Path templateDB = Paths.get(templateDBFileName);
         Path testDB = Paths.get(testDBFileName);
 
         //delete test
@@ -33,11 +38,11 @@ public class DBHelper {
             }
         }
 
-        //copy new db
-        try {
-            Files.copy(templateDB, testDB);
-        } catch (IOException e) {
-            log.severe(String.format("Unable to copy test database file %s : %s", testDB, e.getMessage()));
+        //build fresh db from schema script
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + testDBFileName)) {
+            ScriptUtils.executeSqlScript(connection, new FileSystemResource(schemaFileName));
+        } catch (SQLException e) {
+            log.severe(String.format("Unable to build test database file %s : %s", testDB, e.getMessage()));
         }
     }
 

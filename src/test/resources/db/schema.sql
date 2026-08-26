@@ -1,4 +1,3 @@
-BEGIN TRANSACTION;
 DROP TABLE IF EXISTS `test_table`;
 CREATE TABLE IF NOT EXISTS `test_table` (
 	`id`	INTEGER NOT NULL,
@@ -13,20 +12,6 @@ CREATE TABLE IF NOT EXISTS `products` (
 	`product_unit_name`	TEXT,
 	`product_counter_precision`	INT,
 	PRIMARY KEY(`product_id`)
-);
-DROP TABLE IF EXISTS `payments`;
-CREATE TABLE IF NOT EXISTS `payments` (
-	`payment_id`	INTEGER NOT NULL,
-	`order_id`	INTEGER,
-	`payment_date`	INTEGER NOT NULL,
-	`payment_period_date`	INTEGER NOT NULL,
-	`payment_object_id`	INTEGER NOT NULL,
-	`payment_group_id`	INTEGER NOT NULL,
-	`product_id`	INTEGER,
-	`product_counter`	INTEGER,
-	`payment_amount`	INTEGER NOT NULL,
-	`commission_amount`	INTEGER NOT NULL,
-	PRIMARY KEY(`payment_id`)
 );
 DROP TABLE IF EXISTS `payment_objects`;
 CREATE TABLE IF NOT EXISTS `payment_objects` (
@@ -44,7 +29,25 @@ CREATE TABLE IF NOT EXISTS `payment_groups` (
 	`order_id`	INTEGER,
 	`payment_group_name`	TEXT NOT NULL,
 	`payment_group_url`	TEXT,
+	`payment_group_color`	TEXT,
 	PRIMARY KEY(`payment_group_id`)
+);
+DROP TABLE IF EXISTS `payments`;
+CREATE TABLE IF NOT EXISTS `payments` (
+	`payment_id`	INTEGER NOT NULL,
+	`order_id`	INTEGER,
+	`payment_date`	INTEGER NOT NULL,
+	`payment_period_date`	INTEGER NOT NULL,
+	`payment_object_id`	INTEGER NOT NULL,
+	`payment_group_id`	INTEGER NOT NULL,
+	`product_id`	INTEGER,
+	`product_counter`	INTEGER,
+	`payment_amount`	INTEGER NOT NULL,
+	`commission_amount`	INTEGER NOT NULL,
+	PRIMARY KEY(`payment_id`),
+	CONSTRAINT `FK_PAYMENTS_PRODUCTS` FOREIGN KEY(`product_id`) REFERENCES `products`(`product_id`),
+	CONSTRAINT `FK_PAYMENTS_PAYMENT_OBJECTS` FOREIGN KEY(`payment_object_id`) REFERENCES `payment_objects`(`payment_object_id`),
+	CONSTRAINT `FK_PAYMENTS_PAYMENT_GROUPS` FOREIGN KEY(`payment_group_id`) REFERENCES `payment_groups`(`payment_group_id`)
 );
 DROP INDEX IF EXISTS `ix_payments_period_date`;
 CREATE INDEX IF NOT EXISTS `ix_payments_period_date` ON `payments` (
@@ -54,4 +57,3 @@ DROP INDEX IF EXISTS `ix_payments_location`;
 CREATE INDEX IF NOT EXISTS `ix_payments_location` ON `payments` (
 	`payment_object_id`
 );
-COMMIT;

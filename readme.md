@@ -35,3 +35,6 @@
 
 # Build with specified tomcat home directory:
 `./gradlew.ps1 clean build deployInt -Ptomcat_home=D:/prj/apache-tomcat-9.0.24`
+
+# Generate the ER diagram (db/model/erd.md, db/model/erd.png):
+`./generate_erd.ps1`

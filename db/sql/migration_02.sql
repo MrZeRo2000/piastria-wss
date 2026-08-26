@@ -1,1 +1,0 @@
-ALTER TABLE payment_groups ADD COLUMN payment_group_color TEXT;
