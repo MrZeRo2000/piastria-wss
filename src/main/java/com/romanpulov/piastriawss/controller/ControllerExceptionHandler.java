@@ -2,7 +2,6 @@ package com.romanpulov.piastriawss.controller;
 
 import com.romanpulov.piastriawss.dto.ErrorResponseDTO;
 import com.romanpulov.piastriawss.exception.NotFoundException;
-import com.romanpulov.piastriawss.transform.ExcelReadException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -20,11 +19,6 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(BadPatchRequestException.class)
     public ResponseEntity<ErrorResponseDTO> handleBadPatchRequest(BadPatchRequestException ex, HttpServletRequest request) {
-        return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage(), request.getRequestURI()), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(ExcelReadException.class)
-    public ResponseEntity<ErrorResponseDTO> handleExcelRead(ExcelReadException ex, HttpServletRequest request) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage(), request.getRequestURI()), HttpStatus.BAD_REQUEST);
     }
 

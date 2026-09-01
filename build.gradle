@@ -44,9 +44,14 @@ dependencies {
 	implementation 'org.hibernate.orm:hibernate-community-dialects'
 
 	implementation 'org.xerial:sqlite-jdbc:3.46.0.0'
-	implementation 'org.apache.poi:poi:5.3.0'
 
+	//core
 	implementation 'com.romanpulov:jutils-core:0.5.3'
+
+	//turso
+	implementation 'com.romanpulov:turso-core:0.1.0'
+	implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+	implementation 'org.json:json:20231013'
 
 	testRuntimeOnly 'org.springframework.boot:spring-boot-starter-tomcat'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -83,4 +88,32 @@ tasks.register('printProps') {
 
 tasks.withType(JavaCompile).configureEach {
 	options.compilerArgs += ['-Xlint:deprecation']
+}
+
+tasks.named('test') {
+	useJUnitPlatform {
+		excludeTags 'integration'
+	}
+}
+
+tasks.register('integrationTest', Test) {
+	description = 'Runs integration tests against real services.'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	outputs.upToDateWhen { false }
+
+	// to use the same JVM as used for running daemon
+	javaLauncher.set(javaToolchains.launcherFor {
+		languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion.toInteger())
+		vendor = JvmVendorSpec.matching(System.getProperty("java.vendor"))
+	})
+
+	useJUnitPlatform {
+		includeTags 'integration'
+	}
+	testLogging {
+		events "passed", "skipped", "failed"
+		showStandardStreams = true
+	}
 }

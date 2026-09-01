@@ -14,16 +14,13 @@ import com.romanpulov.piastriawss.repository.ProductRepository;
 import com.romanpulov.piastriawss.service.PaymentObjectPaymentService;
 import com.romanpulov.piastriawss.service.PaymentObjectService;
 import com.romanpulov.piastriawss.service.PaymentService;
-import com.romanpulov.piastriawss.service.PaymentTransformationService;
-import com.romanpulov.piastriawss.transform.ExcelReadException;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.io.IOException;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -56,8 +53,6 @@ public class PaymentCustomController {
 
     private final PaymentObjectPaymentService paymentObjectPaymentService;
 
-    private final PaymentTransformationService paymentTransformationService;
-
     protected final EntityDTOMapper<Payment, PaymentDTO> mapper;
 
     public PaymentCustomController(
@@ -72,8 +67,7 @@ public class PaymentCustomController {
             PaymentRepDTOMapper paymentRepDTOMapper,
             PaymentObjectService paymentObjectService,
             PaymentService paymentService,
-            PaymentObjectPaymentService paymentObjectPaymentService,
-            PaymentTransformationService paymentTransformationService
+            PaymentObjectPaymentService paymentObjectPaymentService
     ) {
         this.paymentRepository = repository;
         this.mapper = mapper;
@@ -87,7 +81,6 @@ public class PaymentCustomController {
         this.paymentObjectService = paymentObjectService;
         this.paymentService = paymentService;
         this.paymentObjectPaymentService = paymentObjectPaymentService;
-        this.paymentTransformationService = paymentTransformationService;
     }
 
     @GetMapping("/payments:refs")
@@ -168,25 +161,6 @@ public class PaymentCustomController {
         int rowsAffected = this.paymentService.duplicatePreviousPeriod(paymentObject, paymentPeriodDate);
 
         return ResponseEntity.ok(new RowsAffectedDTO(rowsAffected));
-    }
-
-    @PostMapping(value="/payments:import_excel")
-    ResponseEntity<RowsAffectedDTO> importExcelFile(
-            @RequestPart("paymentObject")
-                    PaymentObjectDTO paymentObjectDTO,
-            @RequestPart("file") MultipartFile file
-    )  throws ExcelReadException {
-        PaymentObject paymentObject = paymentObjectDTOMapper.dtoTOEntity(paymentObjectDTO);
-
-        try {
-            int rowsAffected = paymentTransformationService.readAndTransformExcelStream(
-                    paymentObject,
-                    file.getInputStream()
-            );
-            return ResponseEntity.ok(new RowsAffectedDTO(rowsAffected));
-        } catch (IOException e) {
-            throw new ExcelReadException("Error reading file: " + e.getMessage());
-        }
     }
 
     @GetMapping("/payments:payment_object_group_refs")
