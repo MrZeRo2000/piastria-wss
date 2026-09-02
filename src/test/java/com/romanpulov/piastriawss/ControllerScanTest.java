@@ -1,6 +1,7 @@
 package com.romanpulov.piastriawss;
 
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -25,6 +26,7 @@ public class ControllerScanTest extends ControllerMockMvcTest {
     }
 
     @Test
+    @Tag("integration")
     void mainTest() throws Exception {
         try {
             MvcResult mvcResult;
