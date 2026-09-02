@@ -2,6 +2,7 @@ package com.romanpulov.piastriawss.controller;
 
 import com.romanpulov.piastriawss.dto.ErrorResponseDTO;
 import com.romanpulov.piastriawss.exception.NotFoundException;
+import com.romanpulov.tursocore.TursoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,8 +13,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponseDTO> handleNotFound(NotFoundException ex, HttpServletRequest request) {
+    @ExceptionHandler({NotFoundException.class, TursoException.class})
+    public ResponseEntity<ErrorResponseDTO> handleNotFound(Exception ex, HttpServletRequest request) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage(), request.getRequestURI()), HttpStatus.NOT_FOUND);
     }
 

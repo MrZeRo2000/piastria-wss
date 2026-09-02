@@ -12,7 +12,7 @@ ext {
 }
 
 group = 'com.romanpulov'
-version = '0.5.1'
+version = '0.6.0'
 
 bootWar {
 	archiveFileName = file_name_build
@@ -39,6 +39,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-aspectj'
+	implementation 'org.springframework.retry:spring-retry:2.0.12'
 
 	//dialects to support SQLite
 	implementation 'org.hibernate.orm:hibernate-community-dialects'
