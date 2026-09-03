@@ -25,7 +25,8 @@ WITH os AS (
     MAX(scan_id) AS max_scan_id
   FROM objects o
   INNER JOIN providers p ON o.provider_id = p.provider_id AND p.provider_code = 'komunalka'
-  INNER JOIN scans s ON o.object_id = s.scan_id
+  INNER JOIN scans s ON o.object_id = s.object_id
+  GROUP BY o.object_desc
 )
 SELECT
   st.scan_desc,
