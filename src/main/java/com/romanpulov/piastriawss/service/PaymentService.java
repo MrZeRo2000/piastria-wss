@@ -1,5 +1,6 @@
 package com.romanpulov.piastriawss.service;
 
+import com.romanpulov.piastriawss.dto.PaymentImportDTO;
 import com.romanpulov.piastriawss.entity.Payment;
 import com.romanpulov.piastriawss.entity.PaymentGroup;
 import com.romanpulov.piastriawss.entity.PaymentObject;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -84,4 +86,17 @@ public class PaymentService extends AbstractEntityService<Payment, PaymentReposi
         return prevPeriodPayments.size();
     }
 
+    @Transactional
+    public int importPaymentAmounts(Collection<PaymentImportDTO> payments) {
+        int count = 0;
+
+        for (PaymentImportDTO payment : payments) {
+            count += this.repository.updatePaymentAmount(
+                    payment.paymentId(),
+                    payment.paymentAmount() == null ? BigDecimal.ZERO : payment.paymentAmount(),
+                    payment.paymentDate());
+        }
+
+        return count;
+    }
 }

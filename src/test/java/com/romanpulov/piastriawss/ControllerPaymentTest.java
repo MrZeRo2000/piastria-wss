@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ControllerPaymentTest extends ControllerMockMvcTest {
@@ -204,6 +205,47 @@ public class ControllerPaymentTest extends ControllerMockMvcTest {
                     .accept(MediaType.APPLICATION_JSON_VALUE))
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andExpect(MockMvcResultMatchers.jsonPath("$.rowsAffected").value("1"))
+                    .andReturn()
+            ;
+
+            addResult(mvcResult);
+
+            // payment 2
+            PaymentDTO payment2DTO = new PaymentDTO(
+                    null,
+                    LocalDate.now(),
+                    periodDate,
+                    paymentObjectDTO,
+                    paymentGroupDTO,
+                    product2DTO,
+                    BigDecimal.valueOf(1),
+                    BigDecimal.valueOf(153.22),
+                    BigDecimal.valueOf(0.3)
+            );
+            json = mapper.writeValueAsString(payment2DTO);
+            mvcResult = this.mvc.perform(MockMvcRequestBuilders.post("/payments")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .characterEncoding(StandardCharsets.UTF_8.name())
+                            .content(json)
+                            .accept(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andReturn()
+            ;
+
+            // import payments
+            var paymentImports = new ArrayList<PaymentImportDTO>();
+            paymentImports.add(new PaymentImportDTO(1L, BigDecimal.valueOf(111.23), LocalDate.now()));
+            paymentImports.add(new PaymentImportDTO(2L, BigDecimal.valueOf(531.84), LocalDate.now()));
+            paymentImports.add(new PaymentImportDTO(7L, BigDecimal.valueOf(5.01), LocalDate.now()));
+            json = mapper.writeValueAsString(paymentImports);
+
+            mvcResult = this.mvc.perform(MockMvcRequestBuilders.patch("/payments:import")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .characterEncoding(StandardCharsets.UTF_8.name())
+                            .content(json)
+                            .accept(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.rowsAffected").value("2"))
                     .andReturn()
             ;
 
