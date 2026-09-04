@@ -234,9 +234,9 @@ public class ControllerPaymentTest extends ControllerMockMvcTest {
 
             // import payments
             var paymentImports = new ArrayList<PaymentImportDTO>();
-            paymentImports.add(new PaymentImportDTO(1L, BigDecimal.valueOf(111.23), LocalDate.now()));
-            paymentImports.add(new PaymentImportDTO(2L, BigDecimal.valueOf(531.84), LocalDate.now()));
-            paymentImports.add(new PaymentImportDTO(7L, BigDecimal.valueOf(5.01), LocalDate.now()));
+            paymentImports.add(new PaymentImportDTO(1L, BigDecimal.valueOf(111.23)));
+            paymentImports.add(new PaymentImportDTO(2L, BigDecimal.valueOf(531.84)));
+            paymentImports.add(new PaymentImportDTO(7L, BigDecimal.valueOf(5.01)));
             json = mapper.writeValueAsString(paymentImports);
 
             mvcResult = this.mvc.perform(MockMvcRequestBuilders.patch("/payments:import")

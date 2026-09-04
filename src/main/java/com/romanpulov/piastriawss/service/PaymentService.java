@@ -94,7 +94,7 @@ public class PaymentService extends AbstractEntityService<Payment, PaymentReposi
             count += this.repository.updatePaymentAmount(
                     payment.paymentId(),
                     payment.paymentAmount() == null ? BigDecimal.ZERO : payment.paymentAmount(),
-                    payment.paymentDate());
+                    LocalDate.now());
         }
 
         return count;
