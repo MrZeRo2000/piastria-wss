@@ -1,10 +1,13 @@
 package com.romanpulov.piastriawss.service;
 
+import com.romanpulov.piastriawss.dto.IdAmountDTO;
 import com.romanpulov.piastriawss.dto.PaymentAmountDTO;
 import com.romanpulov.piastriawss.entity.Payment;
 import com.romanpulov.piastriawss.entity.PaymentGroup;
 import com.romanpulov.piastriawss.entity.PaymentObject;
+import com.romanpulov.piastriawss.exception.CommonEntityNotFoundException;
 import com.romanpulov.piastriawss.repository.PaymentRepository;
+import com.romanpulov.piastriawss.vo.PaymentAmountType;
 import com.romanpulov.piastriawss.vo.Period;
 import com.romanpulov.piastriawss.vo.PeriodType;
 import org.springframework.data.domain.Sort;
@@ -27,24 +30,31 @@ public class PaymentService extends AbstractEntityService<Payment, PaymentReposi
     }
 
     @Transactional
-    public int updateProductCounter(Long paymentId, BigDecimal productCounter, LocalDate paymentDate) {
-        return this.repository.updateProductCounter(paymentId, productCounter, paymentDate);
-    }
+    public IdAmountDTO updatePaymentAmount(Long paymentId, PaymentAmountType paymentAmountType, BigDecimal amount) throws CommonEntityNotFoundException {
+        Payment payment = this.getEntityById(paymentId);
 
-    @Transactional
-    public int updatePaymentAmount(Long paymentId, BigDecimal paymentAmount, LocalDate paymentDate) {
-        if (paymentAmount == null) {
-            paymentAmount = BigDecimal.valueOf(0L);
+        switch (paymentAmountType) {
+            case AT_AMOUNT:
+                payment.setPaymentAmount(amount == null ? BigDecimal.ZERO : amount);
+                break;
+            case AT_COMMISSION_AMOUNT:
+                payment.setCommissionAmount(amount == null ? BigDecimal.ZERO : amount);
+                break;
+            case AT_PRODUCT_COUNTER:
+                payment.setProductCounter(amount);
         }
-        return this.repository.updatePaymentAmount(paymentId, paymentAmount, paymentDate);
-    }
+        payment.setPaymentDate(LocalDate.now());
 
-    @Transactional
-    public int updateCommissionAmount(Long paymentId, BigDecimal commissionAmount, LocalDate paymentDate) {
-        if (commissionAmount == null) {
-            commissionAmount = BigDecimal.valueOf(0L);
-        }
-        return this.repository.updateCommissionAmount(paymentId, commissionAmount, paymentDate);
+        return new IdAmountDTO(
+                payment.getId(),
+                switch (paymentAmountType) {
+                    case AT_AMOUNT -> payment.getPaymentAmount();
+                    case AT_COMMISSION_AMOUNT -> payment.getCommissionAmount();
+                    case AT_PRODUCT_COUNTER -> payment.getProductCounter();
+                    // should never get there
+                    case AT_UNKNOWN -> BigDecimal.ZERO;
+                }
+        );
     }
 
     @Transactional

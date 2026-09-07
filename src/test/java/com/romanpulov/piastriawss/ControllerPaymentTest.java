@@ -196,6 +196,21 @@ public class ControllerPaymentTest extends ControllerMockMvcTest {
 
             addResult(mvcResult);
 
+            patchRequestDTO = new PatchRequestDTO("replace", "/paymentAmount", "47.53");
+            json = mapper.writeValueAsString(patchRequestDTO);
+            mvcResult = this.mvc.perform(MockMvcRequestBuilders.patch("/payments/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .characterEncoding(StandardCharsets.UTF_8.name())
+                    .content(json)
+                    .accept(MediaType.APPLICATION_JSON_VALUE))
+                    .andExpect(MockMvcResultMatchers.status().isOk())
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.id").value("1"))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.amount").value("47.53"))
+                    .andReturn()
+            ;
+
+            addResult(mvcResult);
+
             patchRequestDTO = new PatchRequestDTO("replace", "/productCounter", "34");
             json = mapper.writeValueAsString(patchRequestDTO);
             mvcResult = this.mvc.perform(MockMvcRequestBuilders.patch("/payments/1")
@@ -204,7 +219,8 @@ public class ControllerPaymentTest extends ControllerMockMvcTest {
                     .content(json)
                     .accept(MediaType.APPLICATION_JSON_VALUE))
                     .andExpect(MockMvcResultMatchers.status().isOk())
-                    .andExpect(MockMvcResultMatchers.jsonPath("$.rowsAffected").value("1"))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.id").value("1"))
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.amount").value("34"))
                     .andReturn()
             ;
 
@@ -231,6 +247,8 @@ public class ControllerPaymentTest extends ControllerMockMvcTest {
                     .andExpect(MockMvcResultMatchers.status().isOk())
                     .andReturn()
             ;
+
+            addResult(mvcResult);
 
             // import payments
             var paymentImports = new ArrayList<PaymentAmountDTO>();

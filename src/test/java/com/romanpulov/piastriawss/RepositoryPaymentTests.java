@@ -10,6 +10,7 @@ import com.romanpulov.piastriawss.repository.PaymentObjectRepository;
 import com.romanpulov.piastriawss.repository.PaymentRepository;
 import com.romanpulov.piastriawss.repository.ProductRepository;
 import com.romanpulov.piastriawss.service.PaymentService;
+import com.romanpulov.piastriawss.vo.PaymentAmountType;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +57,7 @@ public class RepositoryPaymentTests {
     private PaymentService paymentService;
 
     @Test
-    void mainTest() {
+    void mainTest() throws Exception {
         Assertions.assertThrows(ConstraintViolationException.class, ()-> {
             Payment newPayment = new Payment();
             paymentRepository.save(newPayment);
@@ -199,19 +199,19 @@ public class RepositoryPaymentTests {
             paymentRepository.save(newPayment2);
         });
 
-        Payment updatingPayment = findByObjectDatePayments.get(0);
+        Payment updatingPayment = findByObjectDatePayments.getFirst();
         int rows;
         Optional<Payment> updatedPayment;
 
         //updating product counter
         BigDecimal newProductCounterValue = BigDecimal.valueOf(9532.77);
 
-        rows = paymentService.updateProductCounter(
+        var updateProductCounterResult = paymentService.updatePaymentAmount(
                 updatingPayment.getId(),
-                newProductCounterValue,
-                 LocalDate.now()
+                PaymentAmountType.AT_PRODUCT_COUNTER,
+                newProductCounterValue
         );
-        assertThat(rows).isEqualTo(1);
+        assertThat(updateProductCounterResult.amount()).isEqualTo(newProductCounterValue);
 
         updatedPayment = paymentRepository.findById(updatingPayment.getId());
         assertThat(updatedPayment.isPresent()).isTrue();
@@ -220,12 +220,12 @@ public class RepositoryPaymentTests {
         //updating payment amount
         BigDecimal newPaymentAmountValue = BigDecimal.valueOf(634.32);
 
-        rows = paymentService.updatePaymentAmount(
+        var updatePaymentAmountResult = paymentService.updatePaymentAmount(
                 updatingPayment.getId(),
-                newPaymentAmountValue,
-                LocalDate.now()
+                PaymentAmountType.AT_AMOUNT,
+                newPaymentAmountValue
         );
-        assertThat(rows).isEqualTo(1);
+        assertThat(updatePaymentAmountResult.amount()).isEqualTo(newPaymentAmountValue);
 
         updatedPayment = paymentRepository.findById(updatingPayment.getId());
         assertThat(updatedPayment.isPresent()).isTrue();
@@ -234,12 +234,12 @@ public class RepositoryPaymentTests {
         //updating commission amount
         BigDecimal newCommissionAmountValue = new BigDecimal("1.23");
 
-        rows = paymentService.updateCommissionAmount(
+        var updateCommissionAmountResult = paymentService.updatePaymentAmount(
                 updatingPayment.getId(),
-                newCommissionAmountValue,
-                LocalDate.now()
+                PaymentAmountType.AT_COMMISSION_AMOUNT,
+                newCommissionAmountValue
         );
-        assertThat(rows).isEqualTo(1);
+        assertThat(updateCommissionAmountResult.amount()).isEqualTo(newCommissionAmountValue);
 
         updatedPayment = paymentRepository.findById(updatingPayment.getId());
         assertThat(updatedPayment.isPresent()).isTrue();
@@ -259,7 +259,7 @@ public class RepositoryPaymentTests {
         paymentObjectRepository.save(paymentObject);
 
         List<PaymentObject> paymentObjects = paymentObjectRepository.findAllByOrderByOrderIdAsc();
-        PaymentObject orphanedPaymentObject = paymentObjects.get(paymentObjects.size()-1);
+        PaymentObject orphanedPaymentObject = paymentObjects.getLast();
 
         //deleting orphaned object should work
         paymentObjectRepository.delete(orphanedPaymentObject);
@@ -268,13 +268,16 @@ public class RepositoryPaymentTests {
         List<Payment> paymentList = new ArrayList<>();
         paymentRepository.findAll().forEach(paymentList::add);
 
-        Assertions.assertTrue(paymentList.size() > 0);
-        PaymentGroup fromPaymentGroup = paymentList.get(0).getPaymentGroup();
-        PaymentObject fromPaymentObject = paymentList.get(0).getPaymentObject();
+        Assertions.assertFalse(paymentList.isEmpty());
+        PaymentGroup fromPaymentGroup = paymentList.getFirst().getPaymentGroup();
+        PaymentObject fromPaymentObject = paymentList.getFirst().getPaymentObject();
 
         List<Payment> paymentListOldPaymentGroup =
-        paymentList.stream().filter(payment -> payment.getPaymentGroup().equals(fromPaymentGroup) && payment.getPaymentObject().equals(fromPaymentObject)).collect(Collectors.toList());
-        Assertions.assertTrue(paymentListOldPaymentGroup.size() > 0);
+        paymentList
+                .stream()
+                .filter(payment -> payment.getPaymentGroup().equals(fromPaymentGroup) && payment.getPaymentObject().equals(fromPaymentObject))
+                .toList();
+        Assertions.assertFalse(paymentListOldPaymentGroup.isEmpty());
 
         PaymentGroup toPaymentGroup = new PaymentGroup();
         toPaymentGroup.setName("To payment group");
@@ -288,8 +291,10 @@ public class RepositoryPaymentTests {
         List<Payment> updatedPaymentList = new ArrayList<>();
         paymentRepository.findAll().forEach(updatedPaymentList::add);
 
-        List<Payment> paymentListNewPaymentGroup =
-                updatedPaymentList.stream().filter(payment -> payment.getPaymentGroup().equals(testToPaymentGroup) && payment.getPaymentObject().equals(fromPaymentObject)).collect(Collectors.toList());
+        List<Payment> paymentListNewPaymentGroup = updatedPaymentList
+                .stream()
+                .filter(payment -> payment.getPaymentGroup().equals(testToPaymentGroup) && payment.getPaymentObject().equals(fromPaymentObject))
+                .toList();
         Assertions.assertEquals(paymentListNewPaymentGroup.size(), paymentListOldPaymentGroup.size());
     }
 }

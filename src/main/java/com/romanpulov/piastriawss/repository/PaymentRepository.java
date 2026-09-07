@@ -50,16 +50,6 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
     );
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE Payment p SET p.productCounter = :product_counter, p.paymentDate = :payment_date WHERE p.id = :payment_id")
-    int updateProductCounter(
-            @Param("payment_id")
-            Long paymentId,
-            @Param("product_counter")
-            BigDecimal productCounter,
-            @Param("payment_date")
-            LocalDate paymentDate);
-
-    @Modifying(clearAutomatically = true)
     @Query("UPDATE Payment p SET p.paymentAmount = :payment_amount, p.paymentDate = :payment_date WHERE p.id = :payment_id")
     int updatePaymentAmount(
             @Param("payment_id")
@@ -68,16 +58,6 @@ public interface PaymentRepository extends CrudRepository<Payment, Long> {
             BigDecimal paymentAmount,
             @Param("payment_date")
             LocalDate paymentDate);
-
-    @Modifying(clearAutomatically = true)
-    @Query("UPDATE Payment p SET p.commissionAmount = :commission_amount, p.paymentDate = :payment_date WHERE p.id = :payment_id")
-    int updateCommissionAmount(
-            @Param("payment_id")
-                    Long paymentId,
-            @Param("commission_amount")
-                    BigDecimal commissionAmount,
-            @Param("payment_date")
-                    LocalDate paymentDate);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Payment p SET p.paymentGroup = :paymentGroupTo WHERE p.paymentObject = :paymentObject AND p.paymentGroup = :paymentGroupFrom")
