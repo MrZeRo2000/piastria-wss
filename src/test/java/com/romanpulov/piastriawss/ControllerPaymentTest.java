@@ -233,13 +233,13 @@ public class ControllerPaymentTest extends ControllerMockMvcTest {
             ;
 
             // import payments
-            var paymentImports = new ArrayList<PaymentImportDTO>();
-            paymentImports.add(new PaymentImportDTO(1L, BigDecimal.valueOf(111.23)));
-            paymentImports.add(new PaymentImportDTO(2L, BigDecimal.valueOf(531.84)));
-            paymentImports.add(new PaymentImportDTO(7L, BigDecimal.valueOf(5.01)));
+            var paymentImports = new ArrayList<PaymentAmountDTO>();
+            paymentImports.add(new PaymentAmountDTO(1L, BigDecimal.valueOf(111.23)));
+            paymentImports.add(new PaymentAmountDTO(2L, BigDecimal.valueOf(531.84)));
+            paymentImports.add(new PaymentAmountDTO(7L, BigDecimal.valueOf(5.01)));
             json = mapper.writeValueAsString(paymentImports);
 
-            mvcResult = this.mvc.perform(MockMvcRequestBuilders.patch("/payments:import")
+            mvcResult = this.mvc.perform(MockMvcRequestBuilders.patch("/payments:update_amount")
                             .contentType(MediaType.APPLICATION_JSON)
                             .characterEncoding(StandardCharsets.UTF_8.name())
                             .content(json)

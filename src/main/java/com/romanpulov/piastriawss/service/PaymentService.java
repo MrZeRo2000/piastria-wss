@@ -1,6 +1,6 @@
 package com.romanpulov.piastriawss.service;
 
-import com.romanpulov.piastriawss.dto.PaymentImportDTO;
+import com.romanpulov.piastriawss.dto.PaymentAmountDTO;
 import com.romanpulov.piastriawss.entity.Payment;
 import com.romanpulov.piastriawss.entity.PaymentGroup;
 import com.romanpulov.piastriawss.entity.PaymentObject;
@@ -87,10 +87,10 @@ public class PaymentService extends AbstractEntityService<Payment, PaymentReposi
     }
 
     @Transactional
-    public int importPaymentAmounts(Collection<PaymentImportDTO> payments) {
+    public int updatePaymentAmounts(Collection<PaymentAmountDTO> payments) {
         int count = 0;
 
-        for (PaymentImportDTO payment : payments) {
+        for (PaymentAmountDTO payment : payments) {
             count += this.repository.updatePaymentAmount(
                     payment.paymentId(),
                     payment.paymentAmount() == null ? BigDecimal.ZERO : payment.paymentAmount(),

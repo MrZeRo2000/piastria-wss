@@ -280,8 +280,8 @@ public class PaymentCustomController {
         return ResponseEntity.ok(new PaymentRepRefsDTO(paymentObjectDTOMapper.entityToDTO(paymentObject), rows));
     }
 
-    @PatchMapping("/payments:import")
-    ResponseEntity<RowsAffectedDTO> importPayments(@RequestBody List<PaymentImportDTO> payments) {
-        return ResponseEntity.ok(new RowsAffectedDTO(this.paymentService.importPaymentAmounts(payments)));
+    @PatchMapping("/payments:update_amount")
+    ResponseEntity<RowsAffectedDTO> updatePaymentAmounts(@RequestBody List<PaymentAmountDTO> payments) {
+        return ResponseEntity.ok(new RowsAffectedDTO(this.paymentService.updatePaymentAmounts(payments)));
     }
 }
