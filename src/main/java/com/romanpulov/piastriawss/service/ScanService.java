@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 @Service
 public class ScanService {
-    private static final Pattern REGEX_AMOUNT = Pattern.compile("\\{'amount':\\s*([0-9.,]+)\\s*\\}");
+    private static final Pattern REGEX_AMOUNT = Pattern.compile("\\{'amount':\\s*'([0-9.,]+)'\\s*\\}");
 
     private static final String SQL_TEXT = """
 WITH os AS (
