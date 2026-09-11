@@ -12,7 +12,7 @@ ext {
 }
 
 group = 'com.romanpulov'
-version = '0.10.0'
+version = ''
 
 bootWar {
 	archiveFileName = file_name_build
