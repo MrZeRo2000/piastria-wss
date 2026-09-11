@@ -82,6 +82,11 @@ tasks.register('deployProd', Copy) {
 	rename file_name_build, file_name_prod
 }
 
+tasks.register('deployAll') {
+	description = 'Deploys both the int and the prod war.'
+	dependsOn('deployInt', 'deployProd')
+}
+
 tasks.register('printProps') {
 	doLast {
 		println tomcat_webapps
