@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 
 @RestController
 @RequestMapping(value = "/payments", produces = MediaType.APPLICATION_JSON_VALUE)
-public class PaymentController extends AbstractServiceRestController<Payment, PaymentDTO, PaymentService> {
+public class PaymentController extends AbstractOrderedServiceRestController<Payment, PaymentDTO, PaymentService> {
 
     public PaymentController(
             PaymentService paymentService,

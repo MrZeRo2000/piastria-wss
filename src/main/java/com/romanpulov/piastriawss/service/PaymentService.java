@@ -6,6 +6,7 @@ import com.romanpulov.piastriawss.entity.Payment;
 import com.romanpulov.piastriawss.entity.PaymentGroup;
 import com.romanpulov.piastriawss.entity.PaymentObject;
 import com.romanpulov.piastriawss.exception.CommonEntityNotFoundException;
+import com.romanpulov.piastriawss.repository.CustomQueryRepository;
 import com.romanpulov.piastriawss.repository.PaymentRepository;
 import com.romanpulov.piastriawss.vo.PaymentAmountType;
 import com.romanpulov.piastriawss.vo.Period;
@@ -20,12 +21,12 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
-public class PaymentService extends AbstractEntityService<Payment, PaymentRepository> {
+public class PaymentService extends AbstractOrderedEntityService<Payment, PaymentRepository> {
 
     private final PaymentObjectService paymentObjectService;
 
-    public PaymentService(PaymentRepository repository, PaymentObjectService paymentObjectService) {
-        super(repository);
+    public PaymentService(PaymentRepository repository, CustomQueryRepository customQueryRepository, PaymentObjectService paymentObjectService) {
+        super(repository, customQueryRepository);
         this.paymentObjectService = paymentObjectService;
     }
 
