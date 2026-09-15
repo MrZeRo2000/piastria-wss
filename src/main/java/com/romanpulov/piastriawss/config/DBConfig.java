@@ -22,12 +22,17 @@ public class DBConfig {
         this.dbProperties = dbProperties;
     }
 
+    private String resolvePropertyPath(String propertyPath) {
+        String homePath = System.getProperty("user.home");
+        return propertyPath.replace("{USER_HOME}", homePath).replace("\\", "/");
+    }
+
     private String getUrl() {
-        return context.getInitParameter("db-url");
+        return resolvePropertyPath(context.getInitParameter("db-url"));
     }
 
     private String getBackupPath() {
-        return context.getInitParameter("db-backup-path");
+        return resolvePropertyPath(context.getInitParameter("db-backup-path"));
     }
 
     @Bean
