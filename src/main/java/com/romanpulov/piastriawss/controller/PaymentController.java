@@ -5,6 +5,7 @@ import com.romanpulov.piastriawss.dto.PatchRequestDTO;
 import com.romanpulov.piastriawss.dto.PaymentDTO;
 import com.romanpulov.piastriawss.entity.Payment;
 import com.romanpulov.piastriawss.entitymapper.EntityDTOMapper;
+import com.romanpulov.piastriawss.exception.BadPatchRequestException;
 import com.romanpulov.piastriawss.exception.CommonEntityNotFoundException;
 import com.romanpulov.piastriawss.service.PaymentService;
 import com.romanpulov.piastriawss.vo.PaymentAmountType;

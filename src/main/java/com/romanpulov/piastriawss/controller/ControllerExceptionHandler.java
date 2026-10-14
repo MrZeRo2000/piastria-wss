@@ -1,6 +1,8 @@
 package com.romanpulov.piastriawss.controller;
 
 import com.romanpulov.piastriawss.dto.ErrorResponseDTO;
+import com.romanpulov.piastriawss.exception.BadPatchRequestException;
+import com.romanpulov.piastriawss.exception.BadRequestException;
 import com.romanpulov.piastriawss.exception.NotFoundException;
 import com.romanpulov.tursocore.TursoException;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,7 @@ public class ControllerExceptionHandler {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage(), request.getRequestURI()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(BadPatchRequestException.class)
+    @ExceptionHandler({BadRequestException.class, BadPatchRequestException.class})
     public ResponseEntity<ErrorResponseDTO> handleBadPatchRequest(BadPatchRequestException ex, HttpServletRequest request) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage(), request.getRequestURI()), HttpStatus.BAD_REQUEST);
     }

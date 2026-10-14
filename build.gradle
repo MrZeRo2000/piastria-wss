@@ -40,7 +40,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-aspectj'
-	implementation 'org.springframework.retry:spring-retry:2.0.12'
+	implementation 'org.springframework.retry:spring-retry:2.0.13'
 
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat-runtime'
 
@@ -50,7 +50,7 @@ dependencies {
 	implementation 'org.xerial:sqlite-jdbc:3.46.0.0'
 
 	//core
-	implementation 'com.romanpulov:jutils-core:0.5.3'
+	implementation 'com.romanpulov:jutils-core:0.6.1'
 
 	//turso
 	implementation 'com.romanpulov:turso-core:0.1.0'

@@ -1,4 +1,4 @@
-package com.romanpulov.piastriawss.controller;
+package com.romanpulov.piastriawss.exception;
 
 public class BadPatchRequestException extends Exception {
     public BadPatchRequestException(String patchRequestSection, String patchRequestValue) {
