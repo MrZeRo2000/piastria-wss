@@ -5,6 +5,7 @@ import com.romanpulov.piastriawss.entity.Payment;
 import com.romanpulov.piastriawss.entity.PaymentGroup;
 import com.romanpulov.piastriawss.entity.PaymentObject;
 import com.romanpulov.piastriawss.entitymapper.*;
+import com.romanpulov.piastriawss.exception.BadRequestException;
 import com.romanpulov.piastriawss.exception.CommonEntityNotFoundException;
 import com.romanpulov.piastriawss.exception.NotFoundException;
 import com.romanpulov.piastriawss.repository.PaymentGroupRepository;
@@ -14,12 +15,11 @@ import com.romanpulov.piastriawss.repository.ProductRepository;
 import com.romanpulov.piastriawss.service.PaymentObjectPaymentService;
 import com.romanpulov.piastriawss.service.PaymentObjectService;
 import com.romanpulov.piastriawss.service.PaymentService;
+import com.romanpulov.piastriawss.service.ReceiptArchiveService;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.persistence.EntityNotFoundException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -53,6 +53,8 @@ public class PaymentCustomController {
 
     private final PaymentObjectPaymentService paymentObjectPaymentService;
 
+    private final ReceiptArchiveService receiptArchiveService;
+
     protected final EntityDTOMapper<Payment, PaymentDTO> mapper;
 
     public PaymentCustomController(
@@ -67,7 +69,8 @@ public class PaymentCustomController {
             PaymentRepDTOMapper paymentRepDTOMapper,
             PaymentObjectService paymentObjectService,
             PaymentService paymentService,
-            PaymentObjectPaymentService paymentObjectPaymentService
+            PaymentObjectPaymentService paymentObjectPaymentService,
+            ReceiptArchiveService receiptArchiveService
     ) {
         this.paymentRepository = repository;
         this.mapper = mapper;
@@ -81,27 +84,21 @@ public class PaymentCustomController {
         this.paymentObjectService = paymentObjectService;
         this.paymentService = paymentService;
         this.paymentObjectPaymentService = paymentObjectPaymentService;
+        this.receiptArchiveService = receiptArchiveService;
     }
 
     @GetMapping("/payments:refs")
     ResponseEntity<PaymentRefsDTO> getRefsByPaymentObjectIdAndDate(
             @RequestParam("paymentObjectId")
-                    Long paymentObjectId,
+            Long paymentObjectId,
             @RequestParam("paymentPeriodDate")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                    LocalDate paymentPeriodDate
+            LocalDate paymentPeriodDate
     ) throws CommonEntityNotFoundException {
-
-        List<PaymentObjectDTO> paymentObjectList = paymentObjectRepository
-                .findAllByOrderByOrderIdAsc()
-                .stream()
-                .map(paymentObjectDTOMapper::entityToDTO)
-                .toList();
-
         PaymentObject paymentObject = paymentObjectRepository
                 .findById(paymentObjectId)
                 .orElseThrow(() -> new CommonEntityNotFoundException(paymentObjectId)
-        );
+                );
 
         PaymentObjectDTO paymentObjectDTO = paymentObjectDTOMapper.entityToDTO(paymentObject);
 
@@ -149,13 +146,13 @@ public class PaymentCustomController {
     @PostMapping("/payments:duplicate_previous_period")
     ResponseEntity<RowsAffectedDTO> duplicatePreviousPeriod(
             @RequestParam("paymentObjectId")
-                    Long paymentObjectId,
+            Long paymentObjectId,
             @RequestParam("paymentPeriodDate")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                    LocalDate paymentPeriodDate
-    ) {
+            LocalDate paymentPeriodDate
+    ) throws NotFoundException {
         PaymentObject paymentObject = paymentObjectRepository.findById(paymentObjectId).orElseThrow(
-                () -> new EntityNotFoundException("Payment object not found:" + paymentObjectId)
+                () -> new CommonEntityNotFoundException(paymentObjectId)
         );
 
         int rowsAffected = this.paymentService.duplicatePreviousPeriod(paymentObject, paymentPeriodDate);
@@ -186,8 +183,8 @@ public class PaymentCustomController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping(value="/payments:update_payment_group")
-    ResponseEntity<RowsAffectedDTO> updatePaymentGroup (
+    @PostMapping(value = "/payments:update_payment_group")
+    ResponseEntity<RowsAffectedDTO> updatePaymentGroup(
             @RequestParam("paymentObjectId")
             Long paymentObjectId,
             @RequestParam("paymentGroupFromId")
@@ -211,34 +208,34 @@ public class PaymentCustomController {
 
     @GetMapping("/payments:payment_object_totals_by_payment_period")
     ResponseEntity<List<PaymentObjectTotalsDTO>> getPaymentObjectTotalsByPaymentPeriod(
-        @RequestParam("paymentPeriodDate")
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-        LocalDate paymentPeriodDate
+            @RequestParam("paymentPeriodDate")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+            LocalDate paymentPeriodDate
     ) {
         List<PaymentObjectTotalsDTO> result = new ArrayList<>();
 
         Map<PaymentObject, BigDecimal> totals = paymentObjectPaymentService.getPaymentObjectTotalsByPaymentPeriod(paymentPeriodDate);
         totals.forEach((paymentObject, value) ->
-            result.add(
-                new PaymentObjectTotalsDTO(
-                    paymentPeriodDate,
-                    paymentObjectDTOMapper.entityToDTO(paymentObject),
-                    value
+                result.add(
+                        new PaymentObjectTotalsDTO(
+                                paymentPeriodDate,
+                                paymentObjectDTOMapper.entityToDTO(paymentObject),
+                                value
+                        )
                 )
-            )
         );
 
         return ResponseEntity.ok(result);
     }
 
     @GetMapping("/payments:payment_object_period_by_id")
-    ResponseEntity<PaymentObjectPeriodTotalDTO> getPaymentObjectPeriodById (
+    ResponseEntity<PaymentObjectPeriodTotalDTO> getPaymentObjectPeriodById(
             @RequestParam("paymentObjectId")
-                    Long paymentObjectId,
+            Long paymentObjectId,
             @RequestParam("currentDate")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                    LocalDate currentDate
-    )  throws NotFoundException {
+            LocalDate currentDate
+    ) throws NotFoundException {
         return ResponseEntity.ok(paymentObjectPaymentService.getPaymentObjectPeriodById(paymentObjectId, currentDate));
     }
 
@@ -254,28 +251,28 @@ public class PaymentCustomController {
     @GetMapping("/payments:payments_by_payment_object_and_payment_period_date_range")
     ResponseEntity<PaymentRepRefsDTO> getPaymentsByPaymentObjectAndPaymentDateRange(
             @RequestParam("paymentObjectId")
-                    Long paymentObjectId,
+            Long paymentObjectId,
             @RequestParam("paymentPeriodDateStart")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                    LocalDate paymentPeriodDateStart,
+            LocalDate paymentPeriodDateStart,
             @RequestParam("paymentPeriodDateEnd")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                    LocalDate paymentPeriodDateEnd
-    ) {
+            LocalDate paymentPeriodDateEnd
+    ) throws NotFoundException {
         PaymentObject paymentObject = paymentObjectRepository.findById(paymentObjectId).orElseThrow(
-                () -> new EntityNotFoundException("Payment object not found:" + paymentObjectId)
+                () -> new CommonEntityNotFoundException(paymentObjectId)
         );
 
         List<PaymentRepDTO> rows =
-            paymentRepository.findByPaymentObjectAndPaymentPeriodDateBetween(
-                    paymentObject,
-                    paymentPeriodDateStart,
-                    paymentPeriodDateEnd,
-                    Sort.by("paymentPeriodDate").ascending()
-            )
-            .stream()
-            .map(paymentRepDTOMapper::entityToDTO)
-            .collect(Collectors.toList());
+                paymentRepository.findByPaymentObjectAndPaymentPeriodDateBetween(
+                                paymentObject,
+                                paymentPeriodDateStart,
+                                paymentPeriodDateEnd,
+                                Sort.by("paymentPeriodDate").ascending()
+                        )
+                        .stream()
+                        .map(paymentRepDTOMapper::entityToDTO)
+                        .collect(Collectors.toList());
 
         return ResponseEntity.ok(new PaymentRepRefsDTO(paymentObjectDTOMapper.entityToDTO(paymentObject), rows));
     }
@@ -283,5 +280,15 @@ public class PaymentCustomController {
     @PatchMapping("/payments:update_amount")
     ResponseEntity<RowsAffectedDTO> updatePaymentAmounts(@RequestBody List<PaymentAmountDTO> payments) {
         return ResponseEntity.ok(new RowsAffectedDTO(this.paymentService.updatePaymentAmounts(payments)));
+    }
+
+    @PatchMapping("/payments:archive_receipt")
+    ResponseEntity<MessageDTO> archivePaymentObjectReceipt(@RequestParam("paymentObjectId") Long paymentObjectId)
+        throws NotFoundException, BadRequestException {
+        PaymentObject paymentObject = paymentObjectRepository.findById(paymentObjectId).orElseThrow(
+                () -> new CommonEntityNotFoundException(paymentObjectId)
+        );
+
+        return ResponseEntity.ok(new MessageDTO(this.receiptArchiveService.archive(paymentObject.getName()).toString()));
     }
 }

@@ -21,7 +21,7 @@ public class ControllerExceptionHandler {
     }
 
     @ExceptionHandler({BadRequestException.class, BadPatchRequestException.class})
-    public ResponseEntity<ErrorResponseDTO> handleBadPatchRequest(BadPatchRequestException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponseDTO> handleBadRequest(Exception ex, HttpServletRequest request) {
         return new ResponseEntity<>(new ErrorResponseDTO(ex.getMessage(), request.getRequestURI()), HttpStatus.BAD_REQUEST);
     }
 

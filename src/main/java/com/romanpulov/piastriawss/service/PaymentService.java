@@ -25,7 +25,10 @@ public class PaymentService extends AbstractOrderedEntityService<Payment, Paymen
 
     private final PaymentObjectService paymentObjectService;
 
-    public PaymentService(PaymentRepository repository, CustomQueryRepository customQueryRepository, PaymentObjectService paymentObjectService) {
+    public PaymentService(
+            PaymentRepository repository,
+            CustomQueryRepository customQueryRepository,
+            PaymentObjectService paymentObjectService) {
         super(repository, customQueryRepository);
         this.paymentObjectService = paymentObjectService;
     }
