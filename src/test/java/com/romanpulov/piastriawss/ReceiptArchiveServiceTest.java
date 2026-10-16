@@ -32,7 +32,6 @@ class ReceiptArchiveServiceTest {
     @TempDir
     Path tempDir;
 
-    private String originalTmpDir;
     private Path sourceDir;
     private Path receiptDir;
     private Path targetDir;
@@ -40,8 +39,6 @@ class ReceiptArchiveServiceTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        // the service reads java.io.tmpdir on every call, so point it at an isolated folder
-        originalTmpDir = System.getProperty("java.io.tmpdir");
         Path tmp = Files.createDirectories(tempDir.resolve("tmp"));
         System.setProperty("java.io.tmpdir", tmp.toString());
         sourceDir = tmp.resolve("backup").resolve("receipt");
@@ -54,11 +51,7 @@ class ReceiptArchiveServiceTest {
 
         DBFileInfo dbFileInfo = new DBFileInfo(dbDir.resolve("piastria.db").toString(), "unused", "unused");
         service = new ReceiptArchiveService(dbFileInfo, mock(Logger.class));
-    }
-
-    @AfterEach
-    void tearDown() {
-        System.setProperty("java.io.tmpdir", originalTmpDir);
+        service.setRootFolder(tmp.toString());
     }
 
     private void createPdf(String name, Instant lastModified) throws IOException {

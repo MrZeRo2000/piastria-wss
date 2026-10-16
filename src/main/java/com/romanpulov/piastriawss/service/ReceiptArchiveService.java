@@ -34,6 +34,16 @@ public class ReceiptArchiveService {
     private final DBFileInfo dbFileInfo;
     private final Logger logger;
 
+    private String rootFolder = System.getenv("TEMP");
+
+    public String getRootFolder() {
+        return rootFolder;
+    }
+
+    public void setRootFolder(String rootFolder) {
+        this.rootFolder = rootFolder;
+    }
+
     public ReceiptArchiveService(DBFileInfo dbFileInfo, Logger logger) {
         this.dbFileInfo = dbFileInfo;
         this.logger = logger;
@@ -46,7 +56,8 @@ public class ReceiptArchiveService {
     private record Settings(String sourceFolder, String targetFolder) {}
 
     private Settings getSettings(String paymentObjectName) throws BadRequestException {
-        Path sourcePath = Paths.get(System.getProperty("java.io.tmpdir"), ARCHIVE_BACKUP_FOLDER_NAME, ARCHIVE_FOLDER_NAME);
+        Path sourcePath = Paths.get(rootFolder, ARCHIVE_BACKUP_FOLDER_NAME, ARCHIVE_FOLDER_NAME);
+        logger.debug("Archive source folder: {}", sourcePath);
         if (!Files.exists(sourcePath) || !Files.isDirectory(sourcePath)) {
             throw new BadRequestException(String.format("Backup temporary directory '%s' does not exist", sourcePath));
         }
