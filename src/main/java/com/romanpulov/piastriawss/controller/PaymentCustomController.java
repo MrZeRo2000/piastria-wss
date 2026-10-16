@@ -292,7 +292,7 @@ public class PaymentCustomController {
 
         return ResponseEntity.ok(this.receiptArchiveService.listFiles(paymentObject.getName())
                 .stream()
-                .map(v -> new FileInfoDTO(v.file().getName(), v.modifiedTime().atZone(ZoneId.systemDefault()).toLocalDate()))
+                .map(v -> new FileInfoDTO(v.file().getName(), v.modifiedTime().atZone(ZoneId.systemDefault()).toLocalDateTime()))
                 .toList());
     }
 
