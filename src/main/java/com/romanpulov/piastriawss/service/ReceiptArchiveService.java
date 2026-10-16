@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,26 +60,36 @@ public class ReceiptArchiveService {
         return new Settings(sourcePath.toString(), targetPath.toString());
     }
 
-    private List<File> scan(Settings settings) {
-        return FileUtils.listFiles(settings.sourceFolder, "*.pdf");
-    }
+    public record FileInfo(File file, Instant modifiedTime) {}
 
-    private void validate(List<File> files) throws BadRequestException {
-        Instant current = Instant.now().minus(Duration.ofHours(6));
+    public List<FileInfo> listFiles(String paymentObjectName) throws BadRequestException {
+        List<FileInfo> result = new ArrayList<>();
+
+        Settings settings = getSettings(paymentObjectName);
+        final Collection<File> files = FileUtils.listFiles(settings.sourceFolder, "*.pdf");
         for (File file : files) {
             try {
                 BasicFileAttributes attr = Files.readAttributes(Path.of(file.getAbsolutePath()), BasicFileAttributes.class);
                 FileTime fileTime = Optional.ofNullable(attr.lastModifiedTime()).orElse(attr.creationTime());
-                if (!fileTime.toInstant().isAfter(current)) {
-                    throw new BadRequestException(String.format("File '%s' is old to archive", file.getName()));
-                }
+                result.add(new FileInfo(file, fileTime.toInstant()));
             } catch (IOException e) {
                 throw new BadRequestException(String.format("Error reading file '%s'", file.getAbsolutePath()));
             }
         }
+
+        return result;
     }
 
-    private Path createArchive(Settings settings, List<File> files) throws BadRequestException {
+    private void validate(List<FileInfo> fileInfos) throws BadRequestException {
+        Instant current = Instant.now().minus(Duration.ofHours(6));
+        for (FileInfo fileInfo : fileInfos) {
+            if (!fileInfo.modifiedTime.isAfter(current)) {
+                throw new BadRequestException(String.format("File '%s' is old to archive", fileInfo.file.getName()));
+            }
+        }
+    }
+
+    private Path createArchive(Settings settings, List<FileInfo> fileInfos) throws BadRequestException {
         Path archiveFilePath = Paths.get(settings.targetFolder, this.getArchiveFileName());
         logger.debug("Archive file: {}", archiveFilePath);
 
@@ -85,7 +97,7 @@ public class ReceiptArchiveService {
             throw new BadRequestException(String.format("Target file '%s' does not exist", archiveFilePath.getFileName()));
         }
 
-        if (!ZipFileUtils.zipFiles(archiveFilePath.toString(), files)) {
+        if (!ZipFileUtils.zipFiles(archiveFilePath.toString(), fileInfos.stream().map(v -> v.file).toList())) {
             throw new BadRequestException(String.format("Error creating archive file '%s'", archiveFilePath.getFileName()));
         }
 
@@ -96,9 +108,9 @@ public class ReceiptArchiveService {
         Settings settings = this.getSettings(paymentObjectName);
         logger.debug("Archive settings: {}", settings);
 
-        List<File> files = scan(settings);
-        this.validate(files);
+        List<FileInfo> fileInfos = listFiles(paymentObjectName);
+        this.validate(fileInfos);
 
-        return this.createArchive(settings, files);
+        return this.createArchive(settings, fileInfos);
     }
 }

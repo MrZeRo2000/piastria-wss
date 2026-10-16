@@ -57,7 +57,7 @@ class ControllerPaymentCustomArchiveReceiptTest {
         Path archivePath = Path.of("root", "receipt", "k1523", "receipt261015_1432.zip");
         when(receiptArchiveService.archive("Киев 15/23")).thenReturn(archivePath);
 
-        mvc.perform(MockMvcRequestBuilders.patch(URL).param("paymentObjectId", "5"))
+        mvc.perform(MockMvcRequestBuilders.post(URL).param("paymentObjectId", "5"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(archivePath.toString()));
 
@@ -68,7 +68,7 @@ class ControllerPaymentCustomArchiveReceiptTest {
     void archiveReceipt_paymentObjectNotFound_returnsErrorAndDoesNotArchive() throws Exception {
         when(paymentObjectRepository.findById(99L)).thenReturn(Optional.empty());
 
-        mvc.perform(MockMvcRequestBuilders.patch(URL).param("paymentObjectId", "99"))
+        mvc.perform(MockMvcRequestBuilders.post(URL).param("paymentObjectId", "99"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Entity with id=99 not found"));
 
@@ -81,14 +81,14 @@ class ControllerPaymentCustomArchiveReceiptTest {
         when(receiptArchiveService.archive("Киев 15/23"))
                 .thenThrow(new BadRequestException("File 'old.pdf' is old to archive"));
 
-        mvc.perform(MockMvcRequestBuilders.patch(URL).param("paymentObjectId", "5"))
+        mvc.perform(MockMvcRequestBuilders.post(URL).param("paymentObjectId", "5"))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("Bad request: File 'old.pdf' is old to archive"));
     }
 
     @Test
     void archiveReceipt_missingParameter_returnsBadRequest() throws Exception {
-        mvc.perform(MockMvcRequestBuilders.patch(URL))
+        mvc.perform(MockMvcRequestBuilders.post(URL))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest());
 
         verifyNoInteractions(paymentObjectRepository, receiptArchiveService);

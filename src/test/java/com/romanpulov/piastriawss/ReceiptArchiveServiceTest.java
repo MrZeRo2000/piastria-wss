@@ -189,4 +189,17 @@ class ReceiptArchiveServiceTest {
             assertNotNull(zip.getEntry("fresh.pdf"));
         }
     }
+
+    @Test
+    void list_generalTest() throws IOException, BadRequestException {
+        Files.createDirectories(targetDir);
+        createPdf("fresh1.pdf", Instant.now());
+        createPdf("fresh2.pdf", Instant.now());
+
+        var files = service.listFiles(PAYMENT_OBJECT_NAME);
+
+        assertFalse(files.isEmpty());
+        assertEquals("fresh1.pdf", files.get(0).file().getName());
+        assertEquals("fresh2.pdf", files.get(1).file().getName());
+    }
 }
