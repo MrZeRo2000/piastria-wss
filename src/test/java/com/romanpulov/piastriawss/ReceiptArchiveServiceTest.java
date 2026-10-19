@@ -12,18 +12,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
-import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.zip.ZipFile;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 class ReceiptArchiveServiceTest {
-    private static final DateTimeFormatter RECEIPT_FORMAT = DateTimeFormatter.ofPattern("yyMMdd_HHmm");
-
     // the target subfolder is TransliterationUtils.toLetterDigitCode(name)
     private static final String PAYMENT_OBJECT_NAME = "Киев 15/23";
     private static final String PAYMENT_OBJECT_FOLDER = "k1523";
@@ -57,10 +52,6 @@ class ReceiptArchiveServiceTest {
         Files.createDirectories(sourceDir);
         Path file = Files.writeString(sourceDir.resolve(name), "%PDF-1.4 test");
         Files.setLastModifiedTime(file, FileTime.from(lastModified));
-    }
-
-    private Path archivePathFor(Instant instant) {
-        return targetDir.resolve("receipt" + RECEIPT_FORMAT.format(instant.atZone(ZoneId.systemDefault())) + ".zip");
     }
 
     @Test
@@ -116,48 +107,22 @@ class ReceiptArchiveServiceTest {
     }
 
     @Test
-    void archive_nonPdfFilesAreIgnoredByValidation() throws IOException {
+    void archive_withPdfFiles_createsZipInTargetFolder() throws IOException, BadRequestException {
         Files.createDirectories(targetDir);
-        createPdf("fresh.pdf", Instant.now());
-        Path txt = Files.writeString(sourceDir.resolve("old.txt"), "ignored");
-        Files.setLastModifiedTime(txt, FileTime.from(Instant.now().minus(Duration.ofDays(3))));
+        createPdf("fresh1.pdf", Instant.now());
+        createPdf("fresh2.pdf", Instant.now());
 
-        // fails later (no archive file), but not because of old.txt
-        BadRequestException e = assertThrows(BadRequestException.class, () -> service.archive(PAYMENT_OBJECT_NAME));
+        Path archive = service.archive(PAYMENT_OBJECT_NAME);
 
-        assertFalse(e.getMessage().contains("old.txt"), e.getMessage());
-    }
+        assertTrue(Files.isRegularFile(archive));
+        assertEquals(targetDir, archive.getParent());
+        assertTrue(archive.getFileName().toString().matches("receipt\\d{6}_\\d{4}\\.zip"), archive.getFileName().toString());
 
-    @Test
-    void archive_freshFileButArchiveFileMissing_throws() throws IOException {
-        Files.createDirectories(targetDir);
-        createPdf("fresh.pdf", Instant.now());
-
-        BadRequestException e = assertThrows(BadRequestException.class, () -> service.archive(PAYMENT_OBJECT_NAME));
-
-        assertTrue(e.getMessage().matches(".*Target file 'receipt\\d{6}_\\d{4}\\.zip' does not exist.*"), e.getMessage());
-    }
-
-    @Test
-    void archive_freshFileAndExistingArchiveFile_zipsFile() throws IOException {
-        Files.createDirectories(targetDir);
-        createPdf("fresh.pdf", Instant.now());
-        // the name is minute-based; create the file for this and the next minute to avoid a boundary race
-        Instant now = Instant.now();
-        Path current = Files.createFile(archivePathFor(now));
-        Path next = archivePathFor(now.plus(Duration.ofMinutes(1)));
-        if (!Files.exists(next)) {
-            Files.createFile(next);
-        }
-
-        Path written = assertDoesNotThrow(() -> service.archive(PAYMENT_OBJECT_NAME));
-
-        assertTrue(written.equals(current) || written.equals(next), written.toString());
-        assertEquals(targetDir, written.getParent());
-        assertTrue(Files.size(written) > 0);
-        try (ZipFile zip = new ZipFile(written.toFile())) {
-            assertEquals(1, zip.size());
-            assertNotNull(zip.getEntry("fresh.pdf"));
+        try (ZipFile zip = new ZipFile(archive.toFile())) {
+            var names = zip.stream().map(e -> Path.of(e.getName()).getFileName().toString()).toList();
+            assertEquals(2, names.size(), names.toString());
+            assertTrue(names.contains("fresh1.pdf"), names.toString());
+            assertTrue(names.contains("fresh2.pdf"), names.toString());
         }
     }
 

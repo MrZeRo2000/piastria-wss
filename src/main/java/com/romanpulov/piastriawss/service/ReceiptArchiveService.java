@@ -35,10 +35,6 @@ public class ReceiptArchiveService {
 
     private String rootFolder = System.getenv("TEMP");
 
-    public String getRootFolder() {
-        return rootFolder;
-    }
-
     public void setRootFolder(String rootFolder) {
         this.rootFolder = rootFolder;
     }
@@ -94,12 +90,16 @@ public class ReceiptArchiveService {
         Path archiveFilePath = Paths.get(settings.targetFolder, this.getArchiveFileName());
         logger.debug("Archive file: {}", archiveFilePath);
 
-        if (!Files.exists(archiveFilePath)) {
-            throw new BadRequestException(String.format("Target file '%s' does not exist", archiveFilePath.getFileName()));
+        if (Files.exists(archiveFilePath)) {
+            throw new BadRequestException(String.format("Target file '%s' already exists", archiveFilePath.getFileName()));
         }
 
         if (!ZipFileUtils.zipFiles(archiveFilePath.toString(), fileInfos.stream().map(v -> v.file).toList())) {
             throw new BadRequestException(String.format("Error creating archive file '%s'", archiveFilePath.getFileName()));
+        }
+
+        if (!Files.exists(archiveFilePath)) {
+            throw new BadRequestException(String.format("Target file '%s' does not exist", archiveFilePath.getFileName()));
         }
 
         return archiveFilePath;
