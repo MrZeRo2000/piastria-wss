@@ -23,6 +23,8 @@ db/initial
 ### Backups
 db/database/backup
 
+### Test files
+db/receipt
 
 ### Log files
 logs/*.log
