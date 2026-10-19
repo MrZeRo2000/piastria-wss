@@ -3,7 +3,6 @@ package com.romanpulov.piastriawss;
 import com.romanpulov.piastriawss.config.DBFileInfo;
 import com.romanpulov.piastriawss.exception.BadRequestException;
 import com.romanpulov.piastriawss.service.ReceiptArchiveService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -114,27 +113,6 @@ class ReceiptArchiveServiceTest {
 
         assertTrue(e.getMessage().contains("Target temporary directory"), e.getMessage());
         assertTrue(e.getMessage().contains("l7"), e.getMessage());
-    }
-
-    @Test
-    void archive_oldFile_throws() throws IOException {
-        Files.createDirectories(targetDir);
-        createPdf("old.pdf", Instant.now().minus(Duration.ofHours(7)));
-
-        BadRequestException e = assertThrows(BadRequestException.class, () -> service.archive(PAYMENT_OBJECT_NAME));
-
-        assertTrue(e.getMessage().contains("File 'old.pdf' is old to archive"), e.getMessage());
-    }
-
-    @Test
-    void archive_oneOldAmongFreshFiles_throws() throws IOException {
-        Files.createDirectories(targetDir);
-        createPdf("fresh.pdf", Instant.now());
-        createPdf("old.pdf", Instant.now().minus(Duration.ofHours(7)));
-
-        BadRequestException e = assertThrows(BadRequestException.class, () -> service.archive(PAYMENT_OBJECT_NAME));
-
-        assertTrue(e.getMessage().contains("old.pdf"), e.getMessage());
     }
 
     @Test

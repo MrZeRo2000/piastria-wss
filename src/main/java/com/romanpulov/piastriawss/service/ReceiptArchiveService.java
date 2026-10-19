@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -91,15 +90,6 @@ public class ReceiptArchiveService {
         return result;
     }
 
-    private void validate(List<FileInfo> fileInfos) throws BadRequestException {
-        Instant current = Instant.now().minus(Duration.ofHours(6));
-        for (FileInfo fileInfo : fileInfos) {
-            if (!fileInfo.modifiedTime.isAfter(current)) {
-                throw new BadRequestException(String.format("File '%s' is old to archive", fileInfo.file.getName()));
-            }
-        }
-    }
-
     private Path createArchive(Settings settings, List<FileInfo> fileInfos) throws BadRequestException {
         Path archiveFilePath = Paths.get(settings.targetFolder, this.getArchiveFileName());
         logger.debug("Archive file: {}", archiveFilePath);
@@ -120,7 +110,6 @@ public class ReceiptArchiveService {
         logger.debug("Archive settings: {}", settings);
 
         List<FileInfo> fileInfos = listFiles(paymentObjectName);
-        this.validate(fileInfos);
 
         return this.createArchive(settings, fileInfos);
     }
