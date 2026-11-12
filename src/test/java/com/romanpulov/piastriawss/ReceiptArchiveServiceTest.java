@@ -132,10 +132,19 @@ class ReceiptArchiveServiceTest {
         createPdf("fresh1.pdf", Instant.now());
         createPdf("fresh2.pdf", Instant.now());
 
-        var files = service.listFiles(PAYMENT_OBJECT_NAME);
+        var info = service.getFileFolderInfo(PAYMENT_OBJECT_NAME);
 
-        assertFalse(files.isEmpty());
-        assertEquals("fresh1.pdf", files.get(0).file().getName());
-        assertEquals("fresh2.pdf", files.get(1).file().getName());
+        assertEquals(sourceDir.toString(), info.folderName());
+        var files = info.fileList();
+        assertEquals(2, files.size());
+        assertEquals("fresh1.pdf", files.get(0).fileName());
+        assertEquals("fresh2.pdf", files.get(1).fileName());
+    }
+
+    @Test
+    void list_sourceFolderMissing_throws() throws IOException {
+        Files.createDirectories(targetDir);
+
+        assertThrows(BadRequestException.class, () -> service.getFileFolderInfo(PAYMENT_OBJECT_NAME));
     }
 }

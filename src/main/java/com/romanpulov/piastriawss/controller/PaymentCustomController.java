@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -283,17 +282,14 @@ public class PaymentCustomController {
         return ResponseEntity.ok(new RowsAffectedDTO(this.paymentService.updatePaymentAmounts(payments)));
     }
 
-    @GetMapping("/payments:list_receipt")
-    ResponseEntity<List<FileInfoDTO>> listPaymentObjectReceipt(@RequestParam("paymentObjectId") Long paymentObjectId)
+    @GetMapping("/payments:get_receipt")
+    ResponseEntity<FileFolderInfoDTO> getPaymentObjectReceipt(@RequestParam("paymentObjectId") Long paymentObjectId)
         throws NotFoundException, BadRequestException {
         PaymentObject paymentObject = paymentObjectRepository.findById(paymentObjectId).orElseThrow(
                 () -> new CommonEntityNotFoundException(paymentObjectId)
         );
 
-        return ResponseEntity.ok(this.receiptArchiveService.listFiles(paymentObject.getName())
-                .stream()
-                .map(v -> new FileInfoDTO(v.file().getName(), v.modifiedTime().atZone(ZoneId.systemDefault()).toLocalDateTime()))
-                .toList());
+        return ResponseEntity.ok(this.receiptArchiveService.getFileFolderInfo(paymentObject.getName()));
     }
 
     @PostMapping("/payments:archive_receipt")

@@ -3,6 +3,8 @@ package com.romanpulov.piastriawss.service;
 import com.romanpulov.jutilscore.io.FileUtils;
 import com.romanpulov.jutilscore.io.ZipFileUtils;
 import com.romanpulov.piastriawss.config.DBFileInfo;
+import com.romanpulov.piastriawss.dto.FileFolderInfoDTO;
+import com.romanpulov.piastriawss.dto.FileInfoDTO;
 import com.romanpulov.piastriawss.exception.BadRequestException;
 import com.romanpulov.piastriawss.utils.TransliterationUtils;
 import org.slf4j.Logger;
@@ -68,11 +70,10 @@ public class ReceiptArchiveService {
 
     public record FileInfo(File file, Instant modifiedTime) {}
 
-    public List<FileInfo> listFiles(String paymentObjectName) throws BadRequestException {
+    public List<FileInfo> listFiles(String sourceFolder) throws BadRequestException {
         List<FileInfo> result = new ArrayList<>();
 
-        Settings settings = getSettings(paymentObjectName);
-        final Collection<File> files = FileUtils.listFiles(settings.sourceFolder, "*.pdf");
+        final Collection<File> files = FileUtils.listFiles(sourceFolder, "*.pdf");
         for (File file : files) {
             try {
                 BasicFileAttributes attr = Files.readAttributes(Path.of(file.getAbsolutePath()), BasicFileAttributes.class);
@@ -84,6 +85,19 @@ public class ReceiptArchiveService {
         }
 
         return result;
+    }
+
+    public FileFolderInfoDTO getFileFolderInfo(String paymentObjectName) throws BadRequestException {
+        Settings settings = getSettings(paymentObjectName);
+        List<FileInfo> fileList = listFiles(settings.sourceFolder);
+
+        return new FileFolderInfoDTO(
+                settings.sourceFolder,
+                fileList.stream()
+                        .map(v -> new FileInfoDTO(v.file().getName(), v.modifiedTime().atZone(ZoneId.systemDefault()).toLocalDateTime()))
+                        .toList()
+        );
+
     }
 
     private Path createArchive(Settings settings, List<FileInfo> fileInfos) throws BadRequestException {
@@ -109,7 +123,7 @@ public class ReceiptArchiveService {
         Settings settings = this.getSettings(paymentObjectName);
         logger.debug("Archive settings: {}", settings);
 
-        List<FileInfo> fileInfos = listFiles(paymentObjectName);
+        List<FileInfo> fileInfos = listFiles(settings.sourceFolder);
 
         return this.createArchive(settings, fileInfos);
     }
