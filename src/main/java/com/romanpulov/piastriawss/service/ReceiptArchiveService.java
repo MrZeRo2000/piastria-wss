@@ -55,9 +55,6 @@ public class ReceiptArchiveService {
     private Settings getSettings(String paymentObjectName) throws BadRequestException {
         Path sourcePath = Paths.get(rootFolder, ARCHIVE_BACKUP_FOLDER_NAME, ARCHIVE_FOLDER_NAME);
         logger.debug("Archive source folder: {}", sourcePath);
-        if (!Files.exists(sourcePath) || !Files.isDirectory(sourcePath)) {
-            throw new BadRequestException(String.format("Backup temporary directory '%s' does not exist", sourcePath));
-        }
 
         String targetSubFolderName = TransliterationUtils.toLetterDigitCode(paymentObjectName);
         Path targetPath = Paths.get(Paths.get(this.dbFileInfo.getDBFileName()).getParent().getParent().toString(), ARCHIVE_FOLDER_NAME, targetSubFolderName);
@@ -122,6 +119,12 @@ public class ReceiptArchiveService {
     public Path archive(String paymentObjectName) throws BadRequestException {
         Settings settings = this.getSettings(paymentObjectName);
         logger.debug("Archive settings: {}", settings);
+
+        Path sourcePath = Paths.get(settings.sourceFolder);
+
+        if (!Files.exists(sourcePath) || !Files.isDirectory(sourcePath)) {
+            throw new BadRequestException(String.format("Backup temporary directory '%s' does not exist", sourcePath));
+        }
 
         List<FileInfo> fileInfos = listFiles(settings.sourceFolder);
 

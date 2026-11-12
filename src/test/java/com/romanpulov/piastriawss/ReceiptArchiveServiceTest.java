@@ -142,9 +142,10 @@ class ReceiptArchiveServiceTest {
     }
 
     @Test
-    void list_sourceFolderMissing_throws() throws IOException {
+    void list_sourceFolderMissing_empty() throws IOException, BadRequestException {
         Files.createDirectories(targetDir);
 
-        assertThrows(BadRequestException.class, () -> service.getFileFolderInfo(PAYMENT_OBJECT_NAME));
+        var folderInfo = service.getFileFolderInfo(PAYMENT_OBJECT_NAME);
+        assertTrue(folderInfo.fileList().isEmpty());
     }
 }
